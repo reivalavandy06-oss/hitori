@@ -733,9 +733,53 @@ module.exports = naze = async (naze, m, msg, store) => {
 			// Tempat Add Case
 			case '19rujxl1e': {
 				console.log('.')
-			}
-			break
-			
+			} case 'jadwalsholat': {
+    let kota = text.split(' ')[0] || 'Banjarnegara';
+    
+    // Membuat format tanggal Indonesia otomatis (Contoh: 27 Maret 2026)
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const tanggalHariIni = new Intl.DateTimeFormat('id-ID', options).format(new Date());
+
+    const quotes = [
+        `"Apa yang menjadi takdirmu tidak akan melewatkanmu." — Umar bin Khattab`,
+        `"Janganlah engkau berduka, sesungguhnya Allah bersama kita." — QS. At-Taubah: 40`,
+        `"Dunia ini hanya persinggahan, akhiratlah tujuan utama."`,
+        `"Sabar itu ada dua: sabar atas sesuatu yang tidak kau ingin, dan sabar menahan diri dari sesuatu yang kau ingini." — Ali bin Abi Thalib`,
+        `"Amal yang paling dicintai Allah adalah shalat pada waktunya." — HR. Bukhari & Muslim`
+    ];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    try {
+        // API akan otomatis memberikan jadwal hari ini jika tidak ditentukan tanggalnya
+        const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${kota}&country=Indonesia&method=20`);
+        const result = await response.json();
+        
+        if (result.code !== 200) return reply(`⚠️ Kota *${kota}* tidak ditemukan.`);
+        
+        const t = result.data.timings;
+
+        let teks = `🕌 *JADWAL SHOLAT KOTA ${kota.toUpperCase()}* 🕌\n`;
+        teks += `"Perbaiki shalatmu, maka Allah akan mempermudah urusanmu."\n\n`;
+        teks += `📅 *Tanggal:* ${tanggalHariIni}\n`; // TANGGAL OTOMATIS BERUBAH TIAP HARI
+        teks += `🕒 *Imsak:* ${t.Imsak} WIB\n`;
+        teks += `🕋 *Subuh:* ${t.Fajr} WIB\n`;
+        teks += `🌅 *Terbit:* ${t.Sunrise} WIB\n`;
+        teks += `☀️ *Dzuhur:* ${t.Dhuhr} WIB\n`;
+        teks += `🌤️ *Ashar:* ${t.Asr} WIB\n`;
+        teks += `🌅 *Maghrib:* ${t.Maghrib} WIB\n`;
+        teks += `🌙 *Isya:* ${t.Isha} WIB\n\n`;
+        teks += `✨ *Kata Mutiara Hari Ini:*\n`;
+        teks += `${randomQuote}\n\n`;
+        teks += `🔔 _Jangan lupa siapkan diri 15 menit sebelum adzan ya!_`;
+
+        await conn.sendMessage(from, { text: teks }, { quoted: m });
+    } catch (e) {
+        console.error(e);
+        reply("❌ Gagal menyambungkan ke server jadwal sholat.");
+    }
+}
+break;
+
 			// Owner Menu
 			case 'shutdown': case 'off': {
 				if (!isCreator) return m.reply(mess.owner)
@@ -4051,6 +4095,9 @@ module.exports = naze = async (naze, m, msg, store) => {
 │${setv} ${prefix}ai (query)
 │${setv} ${prefix}gemini (query)
 │${setv} ${prefix}txt2img (query)
+╰─┬────❍
+╭─┴❍「 *ISLAMI* 」❍
+│${setv} ${prefix}jadwalsholat
 ╰─┬────❍
 ╭─┴❍「 *ANIME* 」❍
 │${setv} ${prefix}waifu
